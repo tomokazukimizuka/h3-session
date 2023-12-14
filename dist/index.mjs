@@ -1,18 +1,25 @@
 import session from 'express-session';
 import { eventHandler, fromNodeMiddleware } from 'h3';
-import connectRedis from 'connect-redis';
+// import connectRedis from 'connect-redis'
+import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
 export function createSessionHandler(options) {
     // Redisの設定がある場合のみoptionsに追加する
     if (options && Object.prototype.hasOwnProperty.call(options, 'redis')) {
         const redisClient = createClient({ url: options.redis.url ?? 'redis://localhost:6379' });
         redisClient.connect().catch(console.error);
-        const RedisStore = connectRedis(session);
+        // @ts-expect-error ___
         const redisStore = new RedisStore({
-            // @ts-expect-error ___
+            // @ts-expect-error ___// @ts-expect-error ___
             client: redisClient,
-            ttl: options.redis.ttl,
+            ttl: 60 * 1,
         });
+        // const RedisStore: connectRedis.RedisStore = connectRedis(session)
+        // const redisStore = new RedisStore({
+        //   // @ts-expect-error ___
+        //   client: redisClient,
+        //   ttl: options.redis.ttl,
+        // })
         options.store = redisStore;
     }
     return [
