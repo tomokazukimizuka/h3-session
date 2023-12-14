@@ -45,11 +45,14 @@
     "h3": "^1.0.1"
   },
   "dependencies": {
-    "express-session": "^1.17.3"
+    "connect-redis": "^7.1.0",
+    "express-session": "^1.17.3",
+    "redis": "^4.6.11"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.0",
     "@nuxt/kit": "3.0.0",
+    "@types/connect-redis": "^0.0.23",
     "@types/express-session": "^1.17.5",
     "bumpp": "^8.2.1",
     "eslint": "^8.16.0",
