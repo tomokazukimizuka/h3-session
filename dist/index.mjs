@@ -4,6 +4,8 @@ import { eventHandler, fromNodeMiddleware } from 'h3';
 import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
 export function createSessionHandler(options) {
+    // optionsにstoreキーを直接追加できないので新しいオブジェクトにセットする
+    const optionsRedis = { ...options };
     // Redisの設定がある場合のみoptionsに追加する
     if (options && Object.prototype.hasOwnProperty.call(options, 'redis')) {
         const redisClient = createClient({ url: options.redis.url ?? 'redis://localhost:6379' });
@@ -20,7 +22,7 @@ export function createSessionHandler(options) {
         //   client: redisClient,
         //   ttl: options.redis.ttl,
         // })
-        options.store = redisStore;
+        optionsRedis.store = redisStore;
     }
     return [
         eventHandler((event) => {
@@ -28,7 +30,7 @@ export function createSessionHandler(options) {
                 event.node.res.writeHead(event.node.res.statusCode);
             };
         }),
-        fromNodeMiddleware(session(options)),
+        fromNodeMiddleware(session(optionsRedis)),
         eventHandler((event) => {
             event.context.session = event.node.req.session;
             event.context.session.regeneratePromisified = () => new Promise((resolve, reject) => {

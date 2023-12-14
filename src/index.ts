@@ -19,6 +19,8 @@ interface SessionOptionsRedis extends SessionOptions {
 }
 
 export function createSessionHandler(options: SessionOptionsRedis): EventHandler[] {
+  // optionsにstoreキーを直接追加できないので新しいオブジェクトにセットする
+  const optionsRedis = { ...options }
   // Redisの設定がある場合のみoptionsに追加する
   if (options && Object.prototype.hasOwnProperty.call(options, 'redis')) {
     const redisClient = createClient({ url: options.redis.url ?? 'redis://localhost:6379' })
@@ -35,15 +37,16 @@ export function createSessionHandler(options: SessionOptionsRedis): EventHandler
     //   client: redisClient,
     //   ttl: options.redis.ttl,
     // })
-    options.store = redisStore
+    optionsRedis.store = redisStore
   }
+
   return [
     eventHandler((event) => {
       (event.node.res as any)._implicitHeader = () => {
         event.node.res.writeHead(event.node.res.statusCode)
       }
     }),
-    fromNodeMiddleware(session(options) as NodeMiddleware),
+    fromNodeMiddleware(session(optionsRedis) as NodeMiddleware),
     eventHandler((event) => {
       event.context.session = (event.node.req as any).session
 
